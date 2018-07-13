@@ -6,8 +6,6 @@ import os
 import sys
 import time
 import random
-
-
 from PIL import Image
 from PIL import ImageFile
 from pytesser import *
@@ -35,7 +33,7 @@ def adbpull(command):
         # args.append(serial)
     args.append('pull')
     args.append(command)
-    print(args)
+    # print(args)
     return subprocess.Popen(args, shell=True, stdout=subprocess.PIPE)
 
 def adbdevices():
@@ -157,7 +155,7 @@ def performOCR():
     crop(800,350,300,450,fileN)
     convPNG2TIF(fileN)
     fullText = tif2text(fileN).split('\n')
-    print(fullText)
+    # print(fullText)
     for text in fullText:
         if text.find("Reward") != -1:
             return "reward"
@@ -224,14 +222,14 @@ def startBot():
                 loopCond = False
                 # performOCR()
             
-            print(ret)
+            print("\r" + ret)
         
         
         print("Clicked Randomly")
-        tap(random.randint(1300,1900),random.randint(100,1000))
+        tap(random.randint(1300,1900),random.randint(450,700))
         sleepPrinter(1)
         print("Clicked Randomly")
-        tap(random.randint(1300,1900),random.randint(100,1000))
+        tap(random.randint(1300,1900),random.randint(450,700))
         sleepPrinter(3)
         # Click get symbol
         if refilled == False:
