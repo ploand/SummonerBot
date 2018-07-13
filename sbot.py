@@ -12,7 +12,7 @@ from pytesser import *
 import cv2.cv2 as cv2
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-adbpath = '..\\platform-tools\\.\\adb'
+adbpath = '.\\platform-tools\\.\\adb'
 serial = ""
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
@@ -145,7 +145,7 @@ def crop2Default():
     if img.all != None:
         crop_img = img[0, 0]
         cv2.imwrite("capcha_c.jpg", crop_img)
-    print("cropped")
+    print("Reset defaults")
 
 def performOCR():
     fileN = getScreenCapture()
@@ -159,7 +159,7 @@ def performOCR():
     fileN = crop(800,350,300,450,fileN)
     convPNG2TIF(fileN)
     fullText = tif2text(fileN).split('\n')
-    print(fullText)
+    # print(fullText)
     for text in fullText:
         if text.find("Reward") != -1:
             return "reward"
@@ -170,7 +170,7 @@ def performOCR():
         if text.find("Rewamd") != -1:
             return "reward"
 
-    return "nothing"
+    return "performed OCR reading "
     
 def refillEnergy():
     print("Clicked Refill")
