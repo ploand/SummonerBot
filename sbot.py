@@ -28,9 +28,6 @@ def adbshell(command):
 
 def adbpull(command):
     args = [adbpath]
-    # if serial is not None:
-        # args.append('-s')
-        # args.append(serial)
     args.append('pull')
     args.append(command)
     # print(args)
@@ -74,12 +71,6 @@ def screenCapture():
         # adbshell('rm /sdcard/SummonerBot/capcha.png')
     adbshell('screencap /sdcard/SummonerBot/capcha.png')
     return ""
-
-def command(x):
-    return {
-        'a': 1,
-        'b': 2,
-    }[x]
 
 def clearConsole():
     os.system('cls') 
@@ -131,7 +122,7 @@ def getScreenCapture():
     # Pull image from the phone
     adbpull("/sdcard/SummonerBot/capcha.png")
     # convert to a working jpg file
-    sleepPrinter(1)
+    time.sleep(1)
     im = Image.open("capcha.png")
     rgb_im = im.convert('RGB')
     rgb_im.save('capcha.jpg')
@@ -142,11 +133,22 @@ def crop(x,y,h,w,fileName):
     img = cv2.imread(fileName + '.jpg')
     if img.all != None:
         crop_img = img[y:y+h, x:x+w]
-        cv2.imwrite(fileName + "_c.jpg", crop_img)
+        cv2.imwrite(fileName + "_c.tif", crop_img)
         return fileName + "_c"
 
+def crop2Default():
+    img = cv2.imread('capcha_c.tif')
+    if img.all != None:
+        crop_img = img[0, 0]
+        cv2.imwrite("capcha_c.tif", crop_img)
+    img = cv2.imread('capcha_c.jpg')
+    if img.all != None:
+        crop_img = img[0, 0]
+        cv2.imwrite("capcha_c.jpg", crop_img)
+    print("cropped")
+
 def performOCR():
-    fileN = getScreenCapture()# '.\dataset\gb10_start_run'
+    fileN = getScreenCapture()
     convPNG2TIF(fileN)
     fullText = tif2text(fileN).split('\n')
     for text in fullText:
@@ -154,16 +156,18 @@ def performOCR():
             return "refill"
         if text.find("Revive") != -1:
             return "revive"
-    crop(800,350,300,450,fileN)
+    fileN = crop(800,350,300,450,fileN)
     convPNG2TIF(fileN)
     fullText = tif2text(fileN).split('\n')
-    # print(fullText)
+    print(fullText)
     for text in fullText:
         if text.find("Reward") != -1:
             return "reward"
         if text.find("Rewand") != -1:
             return "reward"
         if text.find("Rewamdi") != -1:
+            return "reward"
+        if text.find("Rewamd") != -1:
             return "reward"
 
     return "nothing"
@@ -204,14 +208,15 @@ def startBot():
         # sleepPrinter(random.uniform(0,1))
         # imageType = "golden_retriver"
         # print(runImageCheck(imageType).stdout.read().split(b'(score ')[0].decode())
-        crop(1,1,1,1,"capcha") # Reset capcha_c.jpg file to avoid reading the same file next iteration
-        convPNG2TIF("capcha")
+        crop2Default() # Reset capcha_c.tif file to avoid reading the same file next iteration
+        # convPNG2TIF("capcha")
         getScreenCapture()
         print("Clicked Start")
         tap(random.randint(1460,1780),random.randint(780,840)) # Click on start
         # sleepPrinter(random.uniform(110,115))
         refilled = False
         loopCond = True
+        mod = 0
         while loopCond:
             # sleepPrinter(3)
             ret = performOCR()
@@ -234,7 +239,11 @@ def startBot():
                 loopCond = False
                 # performOCR()
             
-            print("\r" + ret)
+            # print("\r" + ret)
+            mod += 1        
+            mod = mod %256 
+            sys.stdout.write('\r' + ret + str(mod))
+            sys.stdout.flush()
         
         
         print("Clicked Randomly")
@@ -265,9 +274,6 @@ def startBot():
         # Replay
         print("Clicked Continue")
         tap(random.randint(350,850),random.randint(520,650))
-        sleepPrinter(random.uniform(1,3))
-        # i = i + 1
-        # command(sc)
 
 clearConsole()
 print("---Finding devices serial---")
