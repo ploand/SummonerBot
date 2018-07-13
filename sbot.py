@@ -152,6 +152,8 @@ def performOCR():
     for text in fullText:
         if text.find("Not enough Energy") != -1:
             return "refill"
+        if text.find("Revive") != -1:
+            return "revive"
     crop(800,350,300,450,fileN)
     convPNG2TIF(fileN)
     fullText = tif2text(fileN).split('\n')
@@ -217,6 +219,16 @@ def startBot():
                 refillEnergy()
                 loopCond = False
                 refilled = True
+
+            if ret.find("revive") != -1:
+                
+                print("Clicked no on revive")
+                tap(random.randint(1050,1420),random.randint(650,750))
+                sleepPrinter(1)
+                print("Clicked Randomly")
+                tap(random.randint(1300,1900),random.randint(450,700))
+                refilled = True
+                loopCond = False
             
             if ret.find("reward") != -1:
                 loopCond = False
