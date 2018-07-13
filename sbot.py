@@ -133,7 +133,7 @@ def crop(x,y,h,w,fileName):
     img = cv2.imread(fileName + '.jpg')
     if img.all != None:
         crop_img = img[y:y+h, x:x+w]
-        cv2.imwrite(fileName + "_c.tif", crop_img)
+        cv2.imwrite(fileName + "_c.jpg", crop_img)
         return fileName + "_c"
 
 def crop2Default():
@@ -157,9 +157,9 @@ def performOCR():
         if text.find("Revive") != -1:
             return "revive"
     fileN = crop(800,350,300,450,fileN)
-    convPNG2TIF(fileN)
+    # convPNG2TIF(fileN)
     fullText = tif2text(fileN).split('\n')
-    # print(fullText)
+    print(fullText)
     for text in fullText:
         if text.find("Reward") != -1:
             return "reward"
@@ -241,7 +241,7 @@ def startBot():
             
             # print("\r" + ret)
             mod += 1        
-            mod = mod %256 
+            mod = mod %1024
             sys.stdout.write('\r' + ret + str(mod))
             sys.stdout.flush()
         
