@@ -1,7 +1,9 @@
 Introduction:
 ============
-SummonerBot is a bot for people who had it enough with the farming required in SW.
+SummonerBot is an Android bot for people who had it enough with the farming required in SW.
 Please use with caution since botting is AGAINST the company policy and YOU CAN GET BANNED for using this bot!
+Nonetheless, the bot uses ADB and uses your phone functionality so it may look like a user feedback and not a 3rd side program.
+Apple phones will not be supported.
 
 
 Dependencies:
@@ -18,11 +20,13 @@ tessdata/	Resources used by tesseract.exe
 Installation:
 ==============
 SummonerBot has no installation functionality in this release.  Extract SummonerBot.zip
-into directory with other scripts.  Necessary files are listed in Dependencies above.  
+into directory with other scripts.  Necessary files are listed in Dependencies above. 
+You may need to edit the adb.exe path in order to make the script work properly with it.
 
 
 Usage:
 ================================
+You will need to connect your phone via USB and enable USB debugging on your phone first.
 insall python and use in command line:
   cd /path/to/SummonerBot/
   python ./sbot.py
