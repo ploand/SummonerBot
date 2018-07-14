@@ -164,9 +164,9 @@ def findCommand(fullText,fileName):
 
 
 clearConsole()
-fileN = "dataset\gb10_confirm_rune_sell"# '.\dataset\gb10_start_run'
+fileN = "dataset\gb10_sell_rune"# '.\dataset\gb10_start_run'
 
-fileN = crop(680,600,100,200,fileN) # Rarity
+fileN = crop(1200,350,50,100,fileN) # Rarity
 convPNG2TIF(fileN)
 fullText = tif2text(fileN).split('\n')
 print(fullText)

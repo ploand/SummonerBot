@@ -101,6 +101,7 @@ def sleepCountdown(timeEpoch):
 
 def tif2text(fileName):
     image_file = fileName
+    text = ""
     try: 
         im = Image.open(image_file + '.tif')
         text = image_to_string(im)
@@ -108,6 +109,8 @@ def tif2text(fileName):
         text = image_file_to_string(image_file + '.tif', graceful_errors=True)
     except IOError:
         print("Error converting tif to text")
+    except errors.Tesser_General_Exception:
+        print("Error converting tif to text in Tesseract")
 
     return text
 
@@ -164,7 +167,7 @@ def crop2Default():
             cv2.imwrite("capcha_c.jpg", crop_img)    
     except IOError:
         print("Could not open file capcha_c.jpg")
-    print("Reset defaults")
+    # print("Reset defaults")
 
 def performOCR():
     fileN = getScreenCapture()
@@ -220,22 +223,24 @@ def exitRefill():
 
 
 def keepOrSellRune():
-    keep = False
+    keep = True
     hasSpeedSub = False
+    sleepPrinter(5)
     fileN = crop(1200,350,50,100,"capcha") # Rarity
     convPNG2TIF(fileN)
+    sleepPrinter(2)
     fullText = tif2text(fileN).split('\n')
+    print(fullText)
     for text in fullText:
         if text.find("Rare"):
             # Sell rune if it's 5* and Rare.
             keep = False
-        # if text.find("Rare"):
-        #     # Sell rune if it's 5* and Rare.
-        #     Keep = False
     
     fileN = crop(600,450,300,500,"capcha") # Sub stats
     convPNG2TIF(fileN)
+    sleepPrinter(2)
     fullText = tif2text(fileN).split('\n')
+    print(fullText)
     for text in fullText:
         if text.find("SPD"):
             # Keep rune if it has speed sub.
@@ -243,7 +248,9 @@ def keepOrSellRune():
 
     # print(fullText)
     # print(findCommand(fullText,fileN))
-    if keep == False:
+    print("found speed? " + str(hasSpeedSub))
+    print("found rare? " + str(keep))
+    if keep == False and hasSpeedSub == False:
         print("Clicked sell rune")
         tap(random.randint(700,900),random.randint(820,920)) 
         sleepPrinter(random.uniform(1,3))
@@ -253,13 +260,14 @@ def keepOrSellRune():
         print("Clicked keep rune")
         tap(random.randint(1030,1230),random.randint(820,920))
 
-def startBot():
-    i = 0
+def startBot(_SellRunes = False):
+    SellRunes = _SellRunes
     while True:
         # imageType = screenCapture()
         print("-----------------------------------------------------------------------------------------")
         # sleepPrinter(random.uniform(0,1))
         # imageType = "golden_retriver"
+        print("Selling runes? " + str(SellRunes))
         # print(runImageCheck(imageType).stdout.read().split(b'(score ')[0].decode())
         crop2Default() # Reset capcha_c.tif file to avoid reading the same file next iteration
         # convPNG2TIF("capcha")
@@ -295,7 +303,7 @@ def startBot():
             # print("\r" + ret)
             mod += 1        
             mod = mod %1024
-            sys.stdout.write('\r' + ret + str(mod))
+            sys.stdout.write(ret + str(mod) + "\n")
             sys.stdout.flush()
         
         
@@ -307,16 +315,29 @@ def startBot():
             tap(random.randint(1300,1350),random.randint(650,700))
             sleepPrinter(3)
             # Click get symbol
-            print("Clicked Get Symbol\\angelmon\\scrolls")
-            tap(random.randint(950,1050),random.randint(850,950)) 
-            sleepPrinter(random.uniform(1,3))
+            fileN = crop(580,250,100,600,"capcha") # Rarity
+            convPNG2TIF(fileN)
+            # sleepPrinter(2)
+            fullText = tif2text(fileN).split('\n')
+            print(fullText)
+            clickOthers = False
+            for text in fullText:
+                if text.find("Rune") == -1:
+                    # if it doesn't have rarity, it's not a rune.
+                    clickOthers = True
+            if clickOthers:    
+                print("Clicked Get Symbol\\angelmon\\scrolls")
+                tap(random.randint(950,1000),random.randint(930,950)) 
+                sleepPrinter(random.uniform(1,3))
             # print("Clicked again for safety")
             # tap(random.randint(850,1050),random.randint(850,950)) 
             # sleepPrinter(random.uniform(1,3))
             # Click keep rune
-            keepOrSellRune()
-            # print("Clicked keep rune")
-            # tap(random.randint(1030,1230),random.randint(820,920)) 
+            if SellRunes:
+                keepOrSellRune()
+            else:
+                print("Clicked keep rune")
+                tap(random.randint(1030,1230),random.randint(820,920)) 
             sleepPrinter(random.uniform(1,3))
             # print("Clicked keep rune")
             # tap(random.randint(1030,1230),random.randint(820,920)) 
@@ -331,15 +352,13 @@ def startBot():
         # Replay
         print("Clicked Continue")
         tap(random.randint(350,850),random.randint(520,650))
-        # Check if we need to refill
-        ret = performOCR()
-        if ret.find("refill") != -1:
-            refillEnergy()
+        sleepPrinter(random.uniform(1.5,2.5))
+        
 
 clearConsole()
 print("---Finding devices serial---")
 serial = adbdevices()
 print("---Serial found---")
-startBot()
+startBot(True)
 
 print("Finished")
