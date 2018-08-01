@@ -6,6 +6,7 @@ import os
 import sys
 import time
 import random
+import numpy as np
 from PIL import Image
 from PIL import ImageFile
 from pytesser import *
@@ -162,14 +163,33 @@ def findCommand(fullText,fileName):
 
     return "ERROR"
 
+def checkFiveStar(fileName):
+    im_gray = cv2.imread(fileName+".jpg", cv2.IMREAD_GRAYSCALE)
+    thresh = 127
+    im_bw = cv2.threshold(im_gray, thresh, 255, cv2.THRESH_BINARY)[1]
+    return im_bw[363][718] == im_bw[363][732]
 
 clearConsole()
-fileN = "dataset\gb10_sell_rune"# '.\dataset\gb10_start_run'
+fileN = ".\dataset\gb10_sell_rune"# '.\dataset\gb10_start_run'
+checkFiveStar(fileN)
+# fileN = crop(735,365,30,150,fileN) # Rarity
 
-fileN = crop(1200,350,50,100,fileN) # Rarity
-convPNG2TIF(fileN)
-fullText = tif2text(fileN).split('\n')
-print(fullText)
-print(findCommand(fullText,fileN))
+# (730,360) (x,y) of 6th star
+# (720,360) (x,y) of 5th star
+# img = cv2.imread(fileN + '.jpg')
+# print(img[700,360])
+# print(img[720,360])
+# if img[720,360].all(img[730,360]):
+    # print("Not a 6* rune")
+# convPNG2TIF(fileN)
+# fullText = tif2text(fileN).split('\n')
+
+# print(fullText)
+# print(findCommand(fullText,fileN))
+# im_gray = cv2.imread(fileN + '.jpg', cv2.IMREAD_GRAYSCALE)
+# # (thresh, im_bw) = cv2.threshold(im_gray, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+# thresh = 150
+# im_bw = cv2.threshold(im_gray, thresh, 255, cv2.THRESH_BINARY)[1]
+# cv2.imwrite(fileN + '.jpg', im_bw)
 
 # print("Finished")
