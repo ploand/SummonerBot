@@ -169,9 +169,22 @@ def checkFiveStar(fileName):
     im_bw = cv2.threshold(im_gray, thresh, 255, cv2.THRESH_BINARY)[1]
     return im_bw[363][718] == im_bw[363][732]
 
+def capchaCheck():
+    fileN = ".\\dataset\\capcha_run"# '.\dataset\gb10_start_run'
+    convPNG2TIF(fileN)
+    fullText = tif2text(fileN).split('\n')
+    for text in fullText:
+        if text.find("correct"):
+            return True
+
 clearConsole()
-fileN = ".\dataset\gb10_sell_rune"# '.\dataset\gb10_start_run'
-checkFiveStar(fileN)
+print(capchaCheck())
+# fileN = ".\dataset\capcha_run"# '.\dataset\gb10_start_run'
+# convPNG2TIF(fileN)
+# fullText = tif2text(fileN).split('\n')
+# for text in fullText:
+#     if text.find("correct"):
+#         return True
 # fileN = crop(735,365,30,150,fileN) # Rarity
 
 # (730,360) (x,y) of 6th star

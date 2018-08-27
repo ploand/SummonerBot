@@ -17,8 +17,14 @@ class adbInterface:
     serial = ""
 
     def __init__(self):
+        # print("Started ADB Interface Controller")
+        # print("---Finding devices serial---")
+        self.serial = self.adbdevices()
+        print("---Serial found " + self.serial + "---")
         return 
     def adbshell(self, command):
+        
+        # print("ADB Shell Command")
         args = [self.adbpath]
         if self.serial is not None:
             args.append('-s')
@@ -43,13 +49,13 @@ class adbInterface:
         # the args input is not dependant in user input)
         child = subprocess.Popen(args, shell=True, stdout=subprocess.PIPE)
         # split the bytes string where I can get the serial of the device
-        print(args)
+        # print(args)
         bSerial = child.stdout.read().split(b'\n')[1].split(b'\t')[0]
         # decode the bytes into string
         return bSerial.decode()
 
     def touchscreen_devices(self):
-            child = self.adbshell('getevent -il')
-            bTouchdev = child.stdout.read().split(b'add device ')
-            bTouchdev = list(filter(lambda x: x.find(b'ABS_MT_POSITION_X') > -1, bTouchdev))[0]
-            return bTouchdev.decode()
+        child = self.adbshell('getevent -il')
+        bTouchdev = child.stdout.read().split(b'add device ')
+        bTouchdev = list(filter(lambda x: x.find(b'ABS_MT_POSITION_X') > -1, bTouchdev))[0]
+        return bTouchdev.decode()

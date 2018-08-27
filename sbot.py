@@ -9,6 +9,7 @@ from PIL import Image
 from PIL import ImageFile
 from pytesser import *
 import cv2.cv2 as cv2
+from adbInterface import adbInterface as adb
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 adbpath = '..\\platform-tools\\.\\adb'
@@ -17,42 +18,47 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 soldRunes = 0
 keptRunes = 0
 totalRefills = 0
+adb = adb()
 
 def adbshell(command):
-    args = [adbpath]
-    if serial is not None:
-        args.append('-s')
-        args.append(serial)
-    args.append('shell')
-    args.append(command)
-    # print(args)
-    return subprocess.Popen(args, shell=True, stdout=subprocess.PIPE)
+    # args = [adbpath]
+    # if serial is not None:
+    #     args.append('-s')
+    #     args.append(serial)
+    # args.append('shell')
+    # args.append(command)
+    # # print(args)
+    # return subprocess.Popen(args, shell=True, stdout=subprocess.PIPE)
+    return adb.adbshell(command)
 
 def adbpull(command):
-    args = [adbpath]
-    args.append('pull')
-    args.append(command)
-    # print(args)
-    return subprocess.Popen(args, shell=True, stdout=subprocess.PIPE)
+    # args = [adbpath]
+    # args.append('pull')
+    # args.append(command)
+    # # print(args)
+    # return subprocess.Popen(args, shell=True, stdout=subprocess.PIPE)
+    return adb.adbpull(command)
 
 def adbdevices():
     # create a tuple with the arguments for the command
-    args = [adbpath]
-    args.append('devices')
-    # run command to shell (This is not hazardos while shell=True because
-    # the args input is not dependant in user input)
-    child = subprocess.Popen(args, shell=True, stdout=subprocess.PIPE)
-    # split the bytes string where I can get the serial of the device
-    print(args)
-    bSerial = child.stdout.read().split(b'\n')[1].split(b'\t')[0]
-    # decode the bytes into string
-    return bSerial.decode()
+    # args = [adbpath]
+    # args.append('devices')
+    # # run command to shell (This is not hazardos while shell=True because
+    # # the args input is not dependant in user input)
+    # child = subprocess.Popen(args, shell=True, stdout=subprocess.PIPE)
+    # # split the bytes string where I can get the serial of the device
+    # print(args)
+    # bSerial = child.stdout.read().split(b'\n')[1].split(b'\t')[0]
+    # # decode the bytes into string
+    # return bSerial.decode()
+    return adb.adbdevices()
 
 def touchscreen_devices():
-        child = adbshell('getevent -il')
-        bTouchdev = child.stdout.read().split(b'add device ')
-        bTouchdev = list(filter(lambda x: x.find(b'ABS_MT_POSITION_X') > -1, bTouchdev))[0]
-        return bTouchdev.decode()
+        # child = adbshell('getevent -il')
+        # bTouchdev = child.stdout.read().split(b'add device ')
+        # bTouchdev = list(filter(lambda x: x.find(b'ABS_MT_POSITION_X') > -1, bTouchdev))[0]
+        # return bTouchdev.decode()
+        return adb.touchscreen_devices()
 
 def tap(x, y):
     command = "input tap " + str(x) + " " + str(y)
@@ -72,7 +78,7 @@ def screenCapture():
     # else:
         # print("-----------------removing screen capture-----------------")
         # adbshell('rm /sdcard/SummonerBot/capcha.png')
-    adbshell('screencap /sdcard/SummonerBot/capcha.png')
+    adbshell('screencap -p /sdcard/SummonerBot/capcha.jpg')
     return ""
 
 def clearConsole():
@@ -135,8 +141,9 @@ def checkSixStar(fileName):
     thresh = 127
     im_bw = cv2.threshold(im_gray, thresh, 255, cv2.THRESH_BINARY)[1]
     try:
-        res = im_bw[363][718] == im_bw[363][732]
-        print("Found it to be a 6*? " + str(res))
+        if im_bw is not None:
+            res = im_bw[363][718] == im_bw[363][732]
+            print("Found it to be a 6*? " + str(res))
     except IOError:
         print("No picture found")
     return res
@@ -144,22 +151,23 @@ def checkSixStar(fileName):
 def getScreenCapture():
     screenCapture()
     # Pull image from the phone
-    adbpull("/sdcard/SummonerBot/capcha.png")
-    # convert to a working jpg file
+    adbpull("/sdcard/SummonerBot/capcha.jpg")
+    # adbpull("/sdcard/SummonerBot/capcha.png")
+    # # convert to a working jpg file
     time.sleep(1)
-    try:
-        im = Image.open("capcha.png")
-        rgb_im = im.convert('RGB')
-        rgb_im.save('capcha.jpg')
-    except IOError:        
-        print("Could not open file capcha.png")
+    # try:
+    #     im = Image.open("capcha.png")
+    #     rgb_im = im.convert('RGB')
+    #     rgb_im.save('capcha.jpg')
+    # except IOError:        
+    #     print("Could not open file capcha.png")
     # return file name
     return "capcha"
 
 def crop(x,y,h,w,fileName):
     try:
         img = cv2.imread(fileName + '.jpg')
-        if img.all != None:
+        if img is not None:
             crop_img = img[y:y+h, x:x+w]
             cv2.imwrite(fileName + "_c.jpg", crop_img)
     except IOError:
@@ -169,7 +177,7 @@ def crop(x,y,h,w,fileName):
 def crop2Default():
     try:
         img = cv2.imread('capcha_c.tif')
-        if img.all() != None:
+        if img is not None:
             crop_img = img[0, 0]
             cv2.imwrite("capcha_c.tif", crop_img)    
     except IOError:
@@ -194,6 +202,8 @@ def performOCR():
             return "refill"
         if text.find("Revive") != -1:
             return "revive"
+        if text.find("correct") != -1:
+            return "correct"
     fileN = crop(800,350,300,450,fileN)
     convPNG2TIF(fileN)
     fullText = tif2text(fileN).split('\n')
@@ -212,15 +222,15 @@ def performOCR():
     
 def refillEnergy():
     print("Clicked Refill")
-    tap(random.randint(670,920),random.randint(600,700))
+    tap(random.randint(690,700),random.randint(600,700))
     sleepPrinter(2)
 
     print("Clicked recharge energy")
-    tap(random.randint(600,970),random.randint(300,700))
+    tap(random.randint(690,700),random.randint(300,700))
     sleepPrinter(2)
 
     print("Clicked confirm buy")
-    tap(random.randint(670,920),random.randint(600,700))
+    tap(random.randint(690,700),random.randint(600,700))
     sleepPrinter(2)
 
     print("Clicked purchase successful")
@@ -305,7 +315,11 @@ def keepOrSellRune():
         if rarity == "Legend":
             keep = True
         else:
-            keep = False
+            # keep = False
+            if  rarity == "Hero" and hasSpeedSub:
+                keep = True
+            else:
+                keep = False
         
     print("keep? " + str(keep))
     if keep == False:
@@ -313,7 +327,7 @@ def keepOrSellRune():
         tap(random.randint(700,900),random.randint(820,920)) 
         sleepPrinter(random.uniform(1,3))
         print("Clicked confirmed rune sell")
-        tap(random.randint(680,880),random.randint(600,700))
+        tap(random.randint(850,880),random.randint(600,700))
         soldRunes += 1
     else:
         print("Clicked keep rune")
@@ -325,10 +339,10 @@ def sayNo2Revives():
     tap(random.randint(1050,1420),random.randint(650,750))
     sleepPrinter(1)
     print("Clicked Randomly")
-    tap(random.randint(1340,1350),random.randint(350,450))
+    tap(random.randint(1340,1350),random.randint(440,450))
     sleepPrinter(1)
     print("Clicked Randomly")
-    tap(random.randint(1300,1350),random.randint(350,450))
+    tap(random.randint(1300,1350),random.randint(440,450))
     sleepPrinter(3)
 
 def clickOther():
@@ -392,6 +406,9 @@ def startBot(_SellRunes = False):
             if ret.find("reward") != -1:
                 loopCond = False
 
+            if ret.find("correct") != -1:
+                return True
+
             mod += 1        
             mod = mod %1024
             sys.stdout.write(ret + str(mod) + "\n")
@@ -399,10 +416,10 @@ def startBot(_SellRunes = False):
         
         if refilled == False:
             print("Clicked Randomly")
-            tap(random.randint(1300,1350),random.randint(450,700))
+            tap(random.randint(1300,1350),random.randint(690,700))
             sleepPrinter(1)
             print("Clicked Randomly")
-            tap(random.randint(1300,1350),random.randint(650,700))
+            tap(random.randint(1300,1350),random.randint(690,700))
             sleepPrinter(3)
             # Click get other stuff if needed
             clickOther()
@@ -415,14 +432,12 @@ def startBot(_SellRunes = False):
             sleepPrinter(random.uniform(2,3))
             
         print("Clicked Continue")
-        tap(random.randint(350,850),random.randint(520,650))
+        tap(random.randint(800,850),random.randint(600,650))
         sleepPrinter(random.uniform(1.5,2.5))
         
 
 clearConsole()
-print("---Finding devices serial---")
-serial = adbdevices()
-print("---Serial found " + serial + "---")
+
 startBot(True)
 # keepOrSellRune()
 
