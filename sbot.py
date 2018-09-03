@@ -21,43 +21,15 @@ totalRefills = 0
 adb = adb()
 
 def adbshell(command):
-    # args = [adbpath]
-    # if serial is not None:
-    #     args.append('-s')
-    #     args.append(serial)
-    # args.append('shell')
-    # args.append(command)
-    # # print(args)
-    # return subprocess.Popen(args, shell=True, stdout=subprocess.PIPE)
     return adb.adbshell(command)
 
 def adbpull(command):
-    # args = [adbpath]
-    # args.append('pull')
-    # args.append(command)
-    # # print(args)
-    # return subprocess.Popen(args, shell=True, stdout=subprocess.PIPE)
     return adb.adbpull(command)
 
 def adbdevices():
-    # create a tuple with the arguments for the command
-    # args = [adbpath]
-    # args.append('devices')
-    # # run command to shell (This is not hazardos while shell=True because
-    # # the args input is not dependant in user input)
-    # child = subprocess.Popen(args, shell=True, stdout=subprocess.PIPE)
-    # # split the bytes string where I can get the serial of the device
-    # print(args)
-    # bSerial = child.stdout.read().split(b'\n')[1].split(b'\t')[0]
-    # # decode the bytes into string
-    # return bSerial.decode()
     return adb.adbdevices()
 
 def touchscreen_devices():
-        # child = adbshell('getevent -il')
-        # bTouchdev = child.stdout.read().split(b'add device ')
-        # bTouchdev = list(filter(lambda x: x.find(b'ABS_MT_POSITION_X') > -1, bTouchdev))[0]
-        # return bTouchdev.decode()
         return adb.touchscreen_devices()
 
 def tap(x, y):
@@ -281,6 +253,11 @@ def keepOrSellRune():
                 rarity = "Hero"
             if text.find("Legend") != -1:
                 rarity = "Legend"
+
+        if rarity == "" and i == 0:
+            clickOther()
+            return
+
         
         fileN = crop(600,350,300,600,"capcha") # Sub stats
         convPNG2TIF(fileN)
@@ -347,25 +324,25 @@ def sayNo2Revives():
 
 def clickOther():
     
-    fileN = crop(580,250,100,600,"capcha") # Rarity
-    convPNG2TIF(fileN)
-    fullText = tif2text(fileN).split('\n')
-    print(fullText)
-    clickOthers = False
-    for text in fullText:
-        if ( text.find("Rare") == -1 ):
-            clickOthers = True
-        if ( text.find("Legend") == -1 ): 
-            clickOthers = True
-        if ( text.find("Hero") == -1 ):
-            # if it doesn't have rarity, it's not a rune.
-            clickOthers = True
-    if clickOthers:    
-        print("it's not a rune!")
-        print("Clicked Get Symbol\\angelmon\\scrolls")
-        tap(random.randint(950,960),random.randint(850,870)) 
-        sleepPrinter(random.uniform(1,3))
-    return clickOthers
+    # fileN = crop(580,250,100,600,"capcha") # Rarity
+    # convPNG2TIF(fileN)
+    # fullText = tif2text(fileN).split('\n')
+    # print(fullText)
+    # clickOthers = False
+    # for text in fullText:
+    #     if ( text.find("Rare") == -1 ):
+    #         clickOthers = True
+    #     if ( text.find("Legend") == -1 ): 
+    #         clickOthers = True
+    #     if ( text.find("Hero") == -1 ):
+    #         # if it doesn't have rarity, it's not a rune.
+    #         clickOthers = True
+    # if clickOthers:    
+    print("it's not a rune!")
+    print("Clicked Get Symbol\\angelmon\\scrolls")
+    tap(random.randint(950,960),random.randint(850,870)) 
+    sleepPrinter(random.uniform(1,3))
+    # return clickOthers
 
 def startBot(_SellRunes = False):
     SellRunes = _SellRunes
@@ -422,7 +399,7 @@ def startBot(_SellRunes = False):
             tap(random.randint(1300,1350),random.randint(690,700))
             sleepPrinter(3)
             # Click get other stuff if needed
-            clickOther()
+            # clickOther()
             # Click keep rune
             if SellRunes:
                 keepOrSellRune()
