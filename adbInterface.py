@@ -8,7 +8,7 @@ import random
 from PIL import Image
 from PIL import ImageFile
 from pytesser import *
-import cv2.cv2 as cv2
+import cv2
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 

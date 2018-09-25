@@ -8,7 +8,7 @@ import random
 from PIL import Image
 from PIL import ImageFile
 from pytesser import *
-import cv2.cv2 as cv2
+import cv2
 from adbInterface import adbInterface as adb
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -45,11 +45,13 @@ def screenCapture():
     bFiles = child.stdout.read().split(b'\n')
     bFiles = list(filter(lambda x: x.find(b'SummonerBot\r') > -1, bFiles))
     if  len(bFiles) == 0:
-        print("-----------------creating new folder-----------------")
+        print("-- creating new folder --")
         adbshell('mkdir -m 777 /sdcard/SummonerBot')
-    # else:
-        # print("-----------------removing screen capture-----------------")
-        # adbshell('rm /sdcard/SummonerBot/capcha.png')
+    else:
+        #print("-- comando do adb para remover capturas de tela --")
+        adbshell('rm /sdcard/SummonerBot/capcha.jpg')
+        #adbshell('rm /sdcard/SummonerBot/capcha_c.jpg')
+        #adbshell('rm /sdcard/SummonerBot/capcha.png')
     adbshell('screencap -p /sdcard/SummonerBot/capcha.jpg')
     return ""
 
@@ -100,7 +102,9 @@ def convTIF2PNG(fileName):
     image_file.save(fileName + '.jpg')
 
 def convPNG2TIF(fileName):
+    # print("-- Nome da imagem salva como TIF --") #Exibindo o nome do arquivo salvo no formato TIF que sera usado como base para leita da tela pelo bot
     # print(fileName)
+    # geralmente o nome das imagens salvas sao "capcha" e "capcha_c" respectivamente
     try: 
         image_file = Image.open(fileName + '.jpg').convert('L')
         image_file.save(fileName + '.tif')
@@ -163,7 +167,13 @@ def crop2Default():
     except IOError:
         print("Could not open file capcha_c.jpg")
 
-def performOCR():
+### textos exibidos no final da dungeon de gigante ###
+    # "eed more room in you" - exibido quando o inventario de runas esta cheio
+    # "symbol that contains" - quando a recompensa eh simbolo do caos
+    # "symbol that contains" - quando a recompensa eh simbolo do caos
+
+def performOCR(): # Metodo que fica sendo executado e faz a leitura da tela para o bot processar as informacoes
+    time.sleep(10) # Adicionado um tempo de espera para o bot nao ler a tela muitas vezes seguidas
     global totalRefills
     fileN = getScreenCapture()
     convPNG2TIF(fileN)
@@ -174,13 +184,18 @@ def performOCR():
             return "refill"
         if text.find("Revive") != -1:
             return "revive"
+        if text.find("pieces of stones") != -1:
+            return "pieces of stones"
+        if text.find("symbol that contains") != -1:
+            return "symbol that contains"
         if text.find("correct") != -1:
             return "correct"
     fileN = crop(800,350,300,450,fileN)
     convPNG2TIF(fileN)
     fullText = tif2text(fileN).split('\n')
-    print(fullText)
-    for text in fullText:
+    print("-- exibindo conteudo da variavel (fullText) utilizada no metodo performOCR --")
+    print(fullText) # exibe a array com varios textos de leitura da tela
+    for text in fullText: # caso o bot retorne reward ele executa o procedimento para verificar runa e continuar
         if text.find("Reward") != -1:
             return "reward"
         if text.find("Rewand") != -1:
@@ -190,33 +205,34 @@ def performOCR():
         if text.find("Rewamd") != -1:
             return "reward"
 
-    return "performed OCR reading "
-    
+    return "performed OCR reading"
+
+# Quando o bot entra neste metodo ele nao sai mais    
 def refillEnergy():
-    print("Clicked Refill")
+    print("\nClicked Refill\n")
     tap(random.randint(690,700),random.randint(600,700))
     sleepPrinter(2)
 
-    print("Clicked recharge energy")
+    print("\nClicked recharge energy\n")
     tap(random.randint(690,700),random.randint(300,700))
     sleepPrinter(2)
 
-    print("Clicked confirm buy")
+    print("\nClicked confirm buy\n")
     tap(random.randint(690,700),random.randint(600,700))
     sleepPrinter(2)
 
-    print("Clicked purchase successful")
+    print("\nClicked purchase successful\n")
     tap(random.randint(840,1090),random.randint(600,700))
     sleepPrinter(2)
 
-    print("Clicked close shop")
+    print("\nClicked close shop\n")
     tap(random.randint(850,1050),random.randint(880,980))
     sleepPrinter(2)
 
-    # exitRefill()
+    exitRefill()
 
 def exitRefill():
-    print("Clicked Close Purchase")
+    print("\nClicked Close Purchase\n")
     tap(random.randint(1760,1850),random.randint(75,140))
 
 
@@ -300,25 +316,25 @@ def keepOrSellRune():
         
     print("keep? " + str(keep))
     if keep == False:
-        print("Clicked sell rune")
+        print("\nClicked sell rune\n")
         tap(random.randint(700,900),random.randint(820,920)) 
         sleepPrinter(random.uniform(1,3))
-        print("Clicked confirmed rune sell")
+        print("\nClicked confirmed rune sell\n")
         tap(random.randint(850,880),random.randint(600,700))
         soldRunes += 1
     else:
-        print("Clicked keep rune")
+        print("\nClicked keep rune\n")
         tap(random.randint(1030,1230),random.randint(820,920))
         keptRunes += 1
 
 def sayNo2Revives():
-    print("Clicked no on revive")
+    print("\nClicked no on revive\n")
     tap(random.randint(1050,1420),random.randint(650,750))
     sleepPrinter(1)
-    print("Clicked Randomly")
+    print("\nClicked Randomly\n")
     tap(random.randint(1340,1350),random.randint(440,450))
     sleepPrinter(1)
-    print("Clicked Randomly")
+    print("\nClicked Randomly\n")
     tap(random.randint(1300,1350),random.randint(440,450))
     sleepPrinter(3)
 
@@ -339,7 +355,7 @@ def clickOther():
     #         clickOthers = True
     # if clickOthers:    
     print("it's not a rune!")
-    print("Clicked Get Symbol\\angelmon\\scrolls")
+    print("\nClicked Get Symbol\\angelmon\\scrolls\n")
     tap(random.randint(950,960),random.randint(850,870)) 
     sleepPrinter(random.uniform(1,3))
     # return clickOthers
@@ -351,10 +367,10 @@ def startBot(_SellRunes = False):
         i += 1
         # print()
         print("-----------------------------------------------------------------------------------------")
-        
-        print("Stats:")
-        print("Selling runes? " + str(SellRunes))
-        print("Number of runes sold: " + str(soldRunes) + " Number of runes kept: " + str(keptRunes))
+        print("-- Stats --")
+        print("Selling runes: " + str(SellRunes))
+        print("Number of runes sold: " + str(soldRunes))
+        print("Number of runes kept: " + str(keptRunes))
         print("Total refills: " + str(totalRefills))
         print("Total runs: " + str(i))
         print("-----------------------------------------------------------------------------------------")
@@ -362,7 +378,7 @@ def startBot(_SellRunes = False):
         crop2Default() # Reset capcha_c.tif file to avoid reading the same file next iteration
         
         getScreenCapture()
-        print("Clicked Start")
+        print("\nClicked Start\n")
         tap(random.randint(1460,1780),random.randint(780,840)) # Click on start
         
         refilled = False
@@ -370,7 +386,7 @@ def startBot(_SellRunes = False):
         mod = 0
         while loopCond:
             ret = performOCR()
-            if ret.find("refill") != -1:
+            if ret.find("refill") != -1: # quando o bot entra na condicao de refil nao esta saindo mais
                 refillEnergy()
                 loopCond = False
                 refilled = True
@@ -386,16 +402,22 @@ def startBot(_SellRunes = False):
             if ret.find("correct") != -1:
                 return True
 
+            if  ret.find("pieces of stones") != -1 or ret.find("symbol that contains") != -1:
+                clickOther()
+                loopCond = False
+
             mod += 1        
             mod = mod %1024
-            sys.stdout.write(ret + str(mod) + "\n")
-            sys.stdout.flush()        
+            print("-- exibindo o texto de leitura de tela --")
+            sys.stdout.write(ret + " (execution number:" + str(mod) + ")\n") # exibe o texto "performed OCR reading" ou o texto que retornardo do metodo performOCR()
+            sys.stdout.flush()
+            print("\n")
         
         if refilled == False:
-            print("Clicked Randomly")
+            print("\nClicked Randomly\n")
             tap(random.randint(1300,1350),random.randint(690,700))
             sleepPrinter(1)
-            print("Clicked Randomly")
+            print("\nClicked Randomly\n")
             tap(random.randint(1300,1350),random.randint(690,700))
             sleepPrinter(3)
             # Click get other stuff if needed
@@ -404,18 +426,18 @@ def startBot(_SellRunes = False):
             if SellRunes:
                 keepOrSellRune()
             else:
-                print("Clicked keep rune")
+                print("\nClicked keep rune\n")
                 tap(random.randint(1030,1230),random.randint(820,920)) 
             sleepPrinter(random.uniform(2,3))
             
-        print("Clicked Continue")
+        print("\nClicked Continue\n")
         tap(random.randint(800,850),random.randint(600,650))
         sleepPrinter(random.uniform(1.5,2.5))
         
 
 clearConsole()
 
-startBot(True)
+startBot(False)
 # keepOrSellRune()
 
 print("Finished")
