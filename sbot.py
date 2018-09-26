@@ -175,6 +175,7 @@ def crop2Default():
     # "eed more room in you" - exibido quando o inventario de runas esta cheio
     # "symbol that contains" - quando a recompensa eh simbolo do caos
     # "pieces of stones"     - quando a recompensa eh pecas de runa
+    # "Unknown Scroll"       - quando a recompensa eh unknown scroll
 
 def performOCR(): # Metodo que fica sendo executado e faz a leitura da tela para o bot processar as informacoes
     time.sleep(2) # Adicionado um tempo de espera para o bot nao ler a tela muitas vezes seguidas
@@ -402,13 +403,13 @@ def startBot(_SellRunes = False):
                 refilled = True
                 loopCond = False
             
-            if ret.find("reward") != -1:
+            if ret.find("reward") != -1 or ret.find("rune screen") != -1:
                 loopCond = False
 
             if ret.find("correct") != -1:
                 return True
 
-            if  ret.find("pieces of stones screen") != -1 or ret.find("symbol that contains screen") != -1 or ret.find("rune screen") != -1:
+            if  ret.find("pieces of stones screen") != -1 or ret.find("symbol that contains screen") != -1:
                 clickOther()
                 loopCond = False
 
