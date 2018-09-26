@@ -20,6 +20,10 @@ keptRunes = 0
 totalRefills = 0
 adb = adb()
 
+### Sobre o funcionamento do bot ###
+    # As vezes o bot nao limpa a variavel ref o que faz com que o texto antigo fique sendo exibido apos a tela de execucao do bot exemplo "Reward"
+    # isso faz com que o bot execute a rotina de cliques 
+
 def adbshell(command):
     return adb.adbshell(command)
 
@@ -170,10 +174,10 @@ def crop2Default():
 ### textos exibidos no final da dungeon de gigante ###
     # "eed more room in you" - exibido quando o inventario de runas esta cheio
     # "symbol that contains" - quando a recompensa eh simbolo do caos
-    # "symbol that contains" - quando a recompensa eh simbolo do caos
+    # "pieces of stones"     - quando a recompensa eh pecas de runa
 
 def performOCR(): # Metodo que fica sendo executado e faz a leitura da tela para o bot processar as informacoes
-    time.sleep(10) # Adicionado um tempo de espera para o bot nao ler a tela muitas vezes seguidas
+    time.sleep(2) # Adicionado um tempo de espera para o bot nao ler a tela muitas vezes seguidas
     global totalRefills
     fileN = getScreenCapture()
     convPNG2TIF(fileN)
@@ -181,13 +185,15 @@ def performOCR(): # Metodo que fica sendo executado e faz a leitura da tela para
     for text in fullText:
         if text.find("Not enough Energy") != -1:
             totalRefills += 1
-            return "refill"
+            return "need refill"
         if text.find("Revive") != -1:
-            return "revive"
+            return "revive screen"
         if text.find("pieces of stones") != -1:
-            return "pieces of stones"
+            return "pieces of stones screen"
         if text.find("symbol that contains") != -1:
-            return "symbol that contains"
+            return "symbol that contains screen"
+        if text.find("DEF") != -1 or text.find("ATK") != -1 or text.find("HP") != -1 or text.find("SPD") != -1 or text.find("CRI") != -1 or text.find("Resistance") != -1 or text.find("Accuracy") != -1:
+            return "rune screen"
         if text.find("correct") != -1:
             return "correct"
     fileN = crop(800,350,300,450,fileN)
@@ -195,7 +201,7 @@ def performOCR(): # Metodo que fica sendo executado e faz a leitura da tela para
     fullText = tif2text(fileN).split('\n')
     print("-- exibindo conteudo da variavel (fullText) utilizada no metodo performOCR --")
     print(fullText) # exibe a array com varios textos de leitura da tela
-    for text in fullText: # caso o bot retorne reward ele executa o procedimento para verificar runa e continuar
+    for text in fullText: # caso o bot retorne reward ele executa o procedimento para verificar runa e continua e retorna a execucao para este metodo
         if text.find("Reward") != -1:
             return "reward"
         if text.find("Rewand") != -1:
@@ -207,7 +213,7 @@ def performOCR(): # Metodo que fica sendo executado e faz a leitura da tela para
 
     return "performed OCR reading"
 
-# Quando o bot entra neste metodo ele nao sai mais    
+# (bug) Quando o bot entra neste metodo ele nao sai mais    
 def refillEnergy():
     print("\nClicked Refill\n")
     tap(random.randint(690,700),random.randint(600,700))
@@ -386,12 +392,12 @@ def startBot(_SellRunes = False):
         mod = 0
         while loopCond:
             ret = performOCR()
-            if ret.find("refill") != -1: # quando o bot entra na condicao de refil nao esta saindo mais
+            if ret.find("need refill") != -1: #(bug) quando o bot entra na condicao de refil nao esta saindo mais
                 refillEnergy()
                 loopCond = False
                 refilled = True
 
-            if ret.find("revive") != -1:
+            if ret.find("revive screen") != -1:
                 sayNo2Revives()
                 refilled = True
                 loopCond = False
@@ -402,7 +408,7 @@ def startBot(_SellRunes = False):
             if ret.find("correct") != -1:
                 return True
 
-            if  ret.find("pieces of stones") != -1 or ret.find("symbol that contains") != -1:
+            if  ret.find("pieces of stones screen") != -1 or ret.find("symbol that contains screen") != -1 or ret.find("rune screen") != -1:
                 clickOther()
                 loopCond = False
 
